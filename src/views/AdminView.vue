@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen w-screen">
+  <div class="h-screen w-screen adminmain">
     <el-container class="h-full w-full">
       <el-header style="height: 10%; background: rgba(0,0,0,0);">
         <NavTop />
@@ -40,6 +40,10 @@ const routers = [
 </script>
 
 <style scoped>
+.adminmain {
+  min-width: 1300px;
+}
+
 .main {
   border-radius: 2rem;
   overflow: auto;

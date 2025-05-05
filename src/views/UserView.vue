@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen w-screen">
+  <div class="h-screen w-screen usermian">
     <el-container class="h-full w-full">
       <el-header style="height: 10%; background: rgba(0,0,0,0);">
         <NavTop />
@@ -9,7 +9,7 @@
           <el-aside class=" h-full">
             <MeNu :routers="routers" />
           </el-aside>
-          <el-main class="h-full main ">
+          <el-main class="h-full main">
             <router-view></router-view>
           </el-main>
         </el-container>
@@ -32,10 +32,6 @@ const routers = [
         name: '学习任务'
     },
     {
-        router: '/user/focus',
-        name: '番茄钟'
-    },
-    {
         router: '/user/chatai',
         name: 'ai小助手'
     },
@@ -56,6 +52,9 @@ const routers = [
 </script>
 
 <style scoped>
+.usermian {
+  min-width: 1300px;
+}
 .main {
   border-radius: 2rem;
   overflow: auto;

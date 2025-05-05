@@ -2,7 +2,7 @@
   <div class="forum">
 
     <!-- 贴子列表 -->
-    <div v-if="!isDetail" class="w-full h-full pt-10 p-4 relative flex gap-3 flex-col items-center">
+    <div @scroll="getMorePostList" ref="postArea" v-if="!isDetail" class="w-full h-full pt-10 p-4 relative flex gap-3 flex-col items-center overflow-y-auto">
       <!-- 发布帖子按钮 -->
       <div class="addIcon w-8 h-8" @click="isAdd = true"></div>
 
@@ -125,6 +125,9 @@ const review = ref(''); // 评论内容
 const couldSubmit = ref(true); // 是否可以提交评论 即是否展示提交框
 const pageNo = ref(1); // 评论页数
 const commentArea = ref(null);
+const postArea = ref(null);
+const postPageNo = ref(1); // 贴子页数
+const hasPostMore = ref(true); // 是否还有更多贴子
 
 const placeTexts = ref('请输入发送的评论');
 
@@ -149,13 +152,15 @@ const commentList = reactive([]);
 // 获取贴子列表
 const getList = async () => {
   const res = await DoAxiosWithErro('/post/list','post',{
-      pageNo: 1,
+      pageNo: postPageNo.value,
       pageSize: 10,
       sortBy: 'time',
       isAsc: true,
       titleKeyword: ''
     },true);
-
+    if(!res.data.length) {
+      hasPostMore.value = false;
+    }
     postList.push(...res.data);
 }
 // 获取贴子详情
@@ -326,6 +331,17 @@ const getMoreCommentList = async () => {
     await getCommentList();
     fetchMore.value = false;
   }  
+}
+
+const getMorePostList = async () => {
+  if(!postArea.value || fetchMore.value || !hasPostMore.value) return
+  const { scrollTop, clientHeight, scrollHeight } = postArea.value;
+  if (scrollTop + clientHeight >= scrollHeight - 20) {
+    fetchMore.value = true;
+    postPageNo.value = postPageNo.value + 1;
+    await getList();
+    fetchMore.value = false;
+  }
 }
 
 

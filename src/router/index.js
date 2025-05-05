@@ -44,12 +44,19 @@ const router = createRouter({
         {
           path:'learntask',
           name:'learntask',
-          component: () => import('../views/user/LearnTask.vue'),
-        },
-        {
-          path:'focus',
-          name:'focus',
-          component: () => import('../views/user/FoCus.vue'),
+          component: () => import('../views/user/TaskHome.vue'),
+          children:[
+            {
+              path:'',
+              name:'tasklist',
+              component: () => import('../views/user/LearnTask.vue'),
+            },
+            {
+              path:'tomato',
+              name:'tomato',
+              component: () => import('../views/user/FoCus.vue')
+            }
+          ]
         },
         {
           path:'chatai',

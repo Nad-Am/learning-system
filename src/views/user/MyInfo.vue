@@ -62,8 +62,30 @@ import { useUserStore } from '@/stores/user';
 
 avatarSrc.value = userStore.userInfo.avatarUrl;
 
-const handleChangeAvatar = () => {
-    console.log("change")
+const handleChangeAvatar = (item) => {
+
+    if(!item.isUnlocked) {
+        DoAxiosWithErro(`/avatars/exchange/${item.id}`, 'post',{}, true).then(res => {
+            if(res.code === 200) {
+                ElMessage({
+                    message:'兑换成功',
+                    type:'success'
+                })
+                const res = DoAxiosWithErro(`/users/change-avatar/${item.id}`, 'post',{}, true);
+                console.log(res);
+                userStore.userInfo.avatarUrl = item.imageUrl;
+            } else {
+                ElMessage({
+                    message:res.message,
+                    type:'error'
+                })
+            }
+        })
+        return;
+    }
+    const res = DoAxiosWithErro(`/users/change-avatar/${item.id}`, 'post',{}, true);
+    userStore.userInfo.avatarUrl = item.imageUrl;
+    console.log(res);
 };
 
 const getAvaterList = () => {
@@ -90,11 +112,14 @@ onMounted(() => {
                 <span>修改头像</span>
                 <template #dropdown>
                     <el-dropdown-menu>
-                        <el-dropdown-item  @click="handleChangeAvatar" class="relative" v-for="item in avatarList" :key="item.id">
+                        <el-dropdown-item  @click="handleChangeAvatar(item)" class="relative" v-for="item in avatarList" :key="item.id">
                             <el-avatar
                                 :size="40"
                                 :src="item.imageUrl"
                             />
+                            <div class="absolute left-1 top-2 bg-white rounded-full">
+                                {{ item.pointsRequired }}
+                            </div>
                             <div v-if="!item.isUnlocked" class="lock rounded-full w-8 h-8"></div>
                         </el-dropdown-item>
                     </el-dropdown-menu>
