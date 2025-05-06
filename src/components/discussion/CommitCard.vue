@@ -30,7 +30,7 @@
     >
         <el-icon v-show="!opORmore"><ArrowDown /></el-icon>
         <el-icon v-show="opORmore"><ArrowUp /></el-icon>
-        {{ opORmore ? '收起' : '展开' }}{{ comment.replies.length }}条回复
+        {{ opORmore ? '收起' : '展开' }}{{ comment.replies?.length }}条回复
     </div>
   </div>
 </template>

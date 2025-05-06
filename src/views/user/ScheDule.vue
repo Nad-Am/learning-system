@@ -220,7 +220,7 @@ function handleEventClick(info) {
   eventForm.eventType = info.event.extendedProps.eventType;
   eventForm.repeatWeeks = info.event.extendedProps.repeatWeeks;
   eventForm.startTime = getTime(firstEvent.startTime);
-  eventForm.endTime = getTime(firstEvent.startTime);
+  eventForm.endTime = getTime(firstEvent.endTime);
   showEventForm.value = true;
 }
 
@@ -252,19 +252,32 @@ const submitForm = () => {
 
   if(!eventForm.id){
     if(eventForm.eventType === 'schedule'){
-      DoAxiosWithErro('/calendar-events', 'post', toRaw(eventForm), true).then(res => {
+      DoAxiosWithErro('/calendar-events', 'post', {
+        ...eventForm,
+        startTime: getTime(eventForm.startTime),
+        endTime: getTime(eventForm.endTime)
+      }, true).then(res => {
         evetList.push(...res.data);
       })
     } else {
-      DoAxiosWithErro('/calendar-events', 'post', toRaw(eventForm), true).then(res => {
+      DoAxiosWithErro('/calendar-events', 'post', {
+        ...eventForm,
+        startTime: getTime(eventForm.startTime),
+        endTime: getTime(eventForm.endTime)
+      }, true).then(res => {
         evetList.push(...res.data);
       })
     }
   } else {
-    DoAxiosWithErro(`/calendar-events/${eventForm.id}`,'put', toRaw(eventForm), true).then(res => {
+    DoAxiosWithErro(`/calendar-events/${eventForm.id}`,'put', {
+      ...eventForm,
+      startTime: getTime(eventForm.startTime),
+      endTime: getTime(eventForm.endTime)
+    }, true).then(res => {
       const index = evetList.findIndex(item => item.id === eventForm.id);
       if (index !== -1){
         evetList.splice(index, 1, res.data);
+        console.log(evetList, sheduleList.value, '更新事件');
       }
     })
   }

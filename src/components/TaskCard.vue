@@ -1,5 +1,5 @@
 <template>
-  <div class="h-1/3 bg-gray-50 p-4 rounded-lg shadow-md border border-gray-100">
+  <div class="h-1/3 relative bg-gray-50 p-4 rounded-lg shadow-md border border-gray-100">
     <div class="flex mb-1">
       <span class="font-bold text-gray-600">科目：</span>
       <span class="text-gray-700">{{ task.subject }}</span>
@@ -12,7 +12,7 @@
 
     <div class="flex mb-1">
       <span class="font-bold text-gray-600">总学习时间：</span>
-      <span class="text-gray-700">{{ task.totalStudyMinutes }} 分钟</span>
+      <span class="text-gray-700">{{ task.durationMinutes ? task.durationMinutes : 0}} 分钟</span>
     </div>
 
     <div class="flex mb-1">
@@ -29,11 +29,16 @@
       <el-button @click="handleUpdate(task)">修改任务</el-button>
       <el-button @click="handleEnterTomato(task)">番茄时间</el-button>
     </div>
+
+    <div class="absolute top-2 right-2">
+      <el-button @click="$emit('delete', task.id)" type="danger" :icon="Delete" circle />
+    </div>
   </div>
 </template>
 
 <script setup>
 import { defineProps } from 'vue';
+import { Delete } from '@element-plus/icons-vue';
 
 const props = defineProps({
   task: {
@@ -42,7 +47,7 @@ const props = defineProps({
   }
 });
 
-const emits = defineEmits(['update','entertomato']);
+const emits = defineEmits(['update','entertomato','delete']);
 
 
 const handleUpdate = (task) => {

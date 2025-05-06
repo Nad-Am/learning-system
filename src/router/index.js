@@ -52,7 +52,7 @@ const router = createRouter({
               component: () => import('../views/user/LearnTask.vue'),
             },
             {
-              path:'tomato',
+              path:'tomato/:id',
               name:'tomato',
               component: () => import('../views/user/FoCus.vue')
             }

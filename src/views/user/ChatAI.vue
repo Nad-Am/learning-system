@@ -3,7 +3,7 @@
     <div class="chat-header">
       <h2 class="text-xl font-semibold">AI 聊天</h2>
     </div>
-    <div class="aicontainer p-2 h-full flex-1 flex flex-col overflow-y-auto">
+    <div ref="messagesArea" class="aicontainer p-2 h-full flex-1 flex flex-col overflow-y-auto">
       <div
        v-for="(message, index) in messages" :key="index"
        :class="{'self-end': message.role === 'user', 'self-start': message.role === 'system'}"
@@ -13,7 +13,7 @@
           {{ message.role === 'user' ? '😊' : '🤖' }}
         </div>
         <div 
-         class="p-2 text-sm" >
+         class="text-sm mytxt p-2" >
           <p>{{ message.content }}</p>
         </div>
       </div>
@@ -23,27 +23,39 @@
         type="text"
         placeholder="输入你的问题..."
         v-model="userInput"
+        maxlength="500"
         @keyup.enter="sendMessage"
         class="w-full h-full  pr-16 border border-gray-300 rounded-md outline-none resize-none"
       />
-      <button @click="sendMessage" class="absolute bottom-1 right-4 p-2 mt-2 bg-blue-500 text-white rounded-full hover:bg-blue-600">
+      <el-button type="primary" :disabled="!couldSendMessage" @click="sendMessage" class="absolute bottom-1 right-4 p-2 mt-2 bg-blue-500 text-white rounded-full hover:bg-blue-600">
         发送
-      </button>
+      </el-button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ElMessage } from 'element-plus';
-import { ref } from 'vue';
+import { ref, nextTick } from 'vue';
 
+const couldSendMessage = ref(true);
+
+const messagesArea = ref(null)
 
 const messages = ref([
   {role: "system", content: "你好！我是你的 AI 助手，请问有什么可以帮助你的？"},
 ])
 const userInput = ref('');
 
+const toBottom = () => {
+  console.log(messagesArea.value)
+  nextTick(() => {
+    messagesArea.value.scrollTop = messagesArea.value.scrollHeight;
+  });
+}
+
 async function main() {
+  couldSendMessage.value = false;
     try {
       const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
         method: 'POST',
@@ -62,6 +74,7 @@ async function main() {
       });
       
     userInput.value = '';
+    couldSendMessage.value = true;
     const reader = response.body.getReader();
     // 创建文本解码器
     const decoder = new TextDecoder();
@@ -70,7 +83,9 @@ async function main() {
     while (true) {
       // 读取流中的下一个数据块
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done){
+        break;
+      };
 
       // 解码二进制数据为文本
       const chunk = decoder.decode(value);
@@ -88,6 +103,7 @@ async function main() {
             streamContent += content;
             // 更新视图
             messages.value[messages.value.length - 1].content = streamContent;
+            toBottom();
           }
         } catch (err) {
           console.error('解析错误:', err);
@@ -105,6 +121,7 @@ const sendMessage = () =>{
   }
   messages.value.push({role: 'user', content: userInput.value});
   messages.value.push({role: 'system', content: '正在思考中...'});
+  toBottom();
   main().then( (str) =>{
     console.log(str)
   });
@@ -115,5 +132,10 @@ const sendMessage = () =>{
 /* 如果需要额外的样式，可以在这里添加 */
 .aicontainer{
   scrollbar-width: none;
+}
+
+.mytxt{
+  font-weight: bold;
+  text-shadow: 2px 2px 2px rgba(3, 143, 224, 0.8);
 }
 </style>

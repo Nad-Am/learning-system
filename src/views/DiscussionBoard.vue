@@ -286,6 +286,7 @@ const ToReply = (id, isAnonymous) => {
     review.value = '';
   }).finally(() => {
     couldSubmit.value = true;
+    toReply.value = false;
   })
 }
 
@@ -308,6 +309,7 @@ const Tocommit = async (postId, isAnonymous) => {
     review.value = '';
   }).finally(() => {
     couldSubmit.value = true;
+    toReply.value = false;
   })
 }
 

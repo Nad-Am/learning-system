@@ -21,7 +21,7 @@
           <el-input v-model="newTask.name" />
         </el-form-item>
         <el-form-item label="任务时长(/min)">
-          <el-input-number v-model="newTask.durationMinutes" :min="0" :max="100"/>
+          <el-input-number v-model="newTask.durationMinutes" :min="25" :max="150"/>
         </el-form-item>
         <el-form-item>
           <el-button @click="comfirmed">确定</el-button>
@@ -35,6 +35,7 @@
        :key="task.id" :task="task" 
        @update="handleClick"
        @entertomato="enterTomato"
+       @delete="deleteTask"
       />
       <el-empty description="暂无任务" v-if="tasks.length === 0" />
     </div>
@@ -42,7 +43,7 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { reactive, ref, onMounted } from 'vue';
 import TaskCard from '@/components/TaskCard.vue';
 import { useUserStore } from '@/stores/user';
 import { DoAxiosWithErro } from '@/api';
@@ -51,41 +52,7 @@ import TaskCRUD from '@/components/TaskCRUD.vue';
 
 const router = useRouter()
 
-const tasks = reactive([
-  {
-      id: 1, // 任务ID
-      userId: 1001, // 用户ID
-      subject: "Mathematics", // 科目
-      name: "Calculus Homework", // 任务名称
-      durationMinutes: 120, // 计划时长(分钟)
-      createdAt: "2025-05-01T09:30:00Z", // 创建时间
-      updatedAt: "2025-05-05T10:45:00Z", // 更新时间
-      totalStudyMinutes: 90, // 总学习时间（分钟）
-      completedPomodoros: 3 // 完成的番茄数
-  },
-  {
-      id: 2, // 任务ID
-      userId: 1001, // 用户ID
-      subject: "Physics", // 科目
-      name: "Quantum Mechanics", // 任务名称
-      durationMinutes: 180, // 计划时长(分钟)
-      createdAt: "2025-05-02T11:00:00Z", // 创建时间
-      updatedAt: "2025-05-06T12:30:00Z", // 更新时间
-      totalStudyMinutes: 150, // 总学习时间（分钟）
-      completedPomodoros: 5 // 完成的番茄数
-  },
-  {
-      id: 3, // 任务ID
-      userId: 1001, // 用户ID
-      subject: "Chemistry", // 科目
-      name: "Organic Chemistry", // 任务名称
-      durationMinutes: 90, // 计划时长(分钟)
-      createdAt: "2025-05-03T13:00:00Z", // 创建时间
-      updatedAt: "2025-05-07T14:15:00Z", // 更新时间
-      totalStudyMinutes: 75, // 总学习时间（分钟）
-      completedPomodoros: 2 // 完成的番茄数
-  },
-])
+const tasks = reactive([])
 
 const userStore = useUserStore()
 
@@ -98,7 +65,7 @@ const newTask = reactive({
 
 
 const FromShow = ref(false);
-const editingEvent = reactive({});
+
 
 const resetNewTask = () => {
   newTask.id = null
@@ -116,21 +83,50 @@ function handleClick (task) {
   FromShow.value = true;
 }
 
+const getTasks = () => {
+  DoAxiosWithErro(`/study/tasks`, 'get', {},true).then(res => {
+    tasks.splice(0, tasks.length)
+    tasks.push(...res.data)
+  })
+}
+
 const addTask = () => {
   DoAxiosWithErro(`/study/tasks`, 'post', {
     subject: newTask.subject,
     name: newTask.name,
     durationMinutes: newTask.durationMinutes,
   },true).then(res => {
-    console.log(res)
+    tasks.push(res.data)
   })
 }
 
+
 const comfirmed = () => {
-  console.log(newTask)
   if(!newTask.id) {
     addTask()
+  } else {
+    updateTask()
   }
+  FromShow.value = false
+}
+
+const updateTask = () => {
+  DoAxiosWithErro(`/study/tasks/${newTask.id}`, 'put', {
+    id: newTask.id,
+    subject: newTask.subject,
+    name: newTask.name,
+    durationMinutes: newTask.durationMinutes,
+  },true).then(res => {
+    const index = tasks.findIndex(task => task.id === newTask.id)
+    tasks.splice(index, 1, res.data)
+  })
+}
+
+const deleteTask = (taskId) => {
+  DoAxiosWithErro(`/study/tasks/${taskId}`, 'delete', {},true).then(res => {
+    const index = tasks.findIndex(t => t.id === task.id)
+    tasks.splice(index, 1)
+  })
 }
 
 const enterTomato = (task) => {
@@ -141,6 +137,10 @@ const enterTomato = (task) => {
     }
   })
 }
+
+onMounted(() => {
+  getTasks()
+})
 
 
 </script>

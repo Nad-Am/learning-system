@@ -43,9 +43,10 @@ const turnHome = () => {
 }
 
 const CheckIn = async () => {
-  DoAxiosWithErro('/users/checkin', 'post',{},true).then(() => {
+  DoAxiosWithErro('/users/checkin', 'post',{},true).then((res) => {
     ElMessage.success('签到成功')
     hascheckin.value = true
+    userStore.userInfo.points = res.data.totalPoints
   })
 }
 
