@@ -34,10 +34,12 @@ const router = useRouter()
 const userStore = useUserStore()
 const hascheckin = ref(false)
 
-const turnHome = async () => {
-  userStore.logout().finally(() => {
+const turnHome = () => {
+  try{
+    userStore.logout()
+  } finally{
     router.push('/')
-  })
+  }
 }
 
 const CheckIn = async () => {

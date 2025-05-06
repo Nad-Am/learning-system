@@ -117,7 +117,7 @@ function handleClick (task) {
 }
 
 const addTask = () => {
-  DoAxiosWithErro(`/study/tasks?userId=${userStore.userInfo.id}`, 'post', {
+  DoAxiosWithErro(`/study/tasks`, 'post', {
     subject: newTask.subject,
     name: newTask.name,
     durationMinutes: newTask.durationMinutes,

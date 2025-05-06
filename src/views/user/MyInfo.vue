@@ -70,10 +70,11 @@ const handleChangeAvatar = (item) => {
                 ElMessage({
                     message:'兑换成功',
                     type:'success'
+                }) 
+                DoAxiosWithErro(`/users/change-avatar/${item.id}`, 'post',{}, true).then(()=>{
+                    userStore.userInfo.points = userStore.userInfo.points  - item.pointsRequired;
+                    userStore.userInfo.avatarUrl = item.imageUrl;
                 })
-                const res = DoAxiosWithErro(`/users/change-avatar/${item.id}`, 'post',{}, true);
-                console.log(res);
-                userStore.userInfo.avatarUrl = item.imageUrl;
             } else {
                 ElMessage({
                     message:res.message,
