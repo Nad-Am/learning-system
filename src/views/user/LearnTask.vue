@@ -29,7 +29,7 @@
         </el-form-item>
       </el-form>
     </div>
-    <div class="w-full flex-1 flex gap-10">
+    <div class="w-full flex-1 flex-wrap flex gap-10">
       <TaskCard
        v-for="task in tasks" 
        :key="task.id" :task="task" 
@@ -124,7 +124,7 @@ const updateTask = () => {
 
 const deleteTask = (taskId) => {
   DoAxiosWithErro(`/study/tasks/${taskId}`, 'delete', {},true).then(res => {
-    const index = tasks.findIndex(t => t.id === task.id)
+    const index = tasks.findIndex(t => t.id === taskId)
     tasks.splice(index, 1)
   })
 }
