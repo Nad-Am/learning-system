@@ -296,9 +296,9 @@ const submitForm = () => {
 
 const deleteEvent = () => {
   DoAxiosWithErro(`/calendar-events/${eventForm.id}`, 'delete', null, true).then(res => {
-    const index = evetList.class.findIndex(item => item.id === eventForm.id);
+    const index = evetList.findIndex(item => item.id === eventForm.id);
     if (index !== -1){
-      evetList.class.splice(index, 1);
+      evetList.splice(index, 1);
     }
     showEventForm.value = false;
   })
