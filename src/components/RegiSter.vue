@@ -62,8 +62,12 @@ const checkName = (rule,value,callback) => {
   }
   DoAxios('/users/check-exists','get',{
     nickname:value
-  }).then(()=> {
-    callback();
+  }).then((res)=> {
+    if(res.data){
+      callback(new Error("昵称已存在"))
+    } else {
+      callback()
+    }
   }).catch(rject => {
     callback(rject);
   })
@@ -86,8 +90,12 @@ const checkEmail = (rule, value, callback) => {
   DoAxios('/users/check-exists', 'get', {
     email: value
   },false)
-  .then(()=>{
-    callback();
+  .then((res)=>{
+    if(res.data){
+      callback(new Error("邮箱已注册"))
+    } else {
+      callback()
+    }
   })
   .catch(err => {
     callback(err);
@@ -150,7 +158,7 @@ const submitForm = () => {
   formEl.validate(async(valid) => {
     if (valid) {
       isfetching.value = true
-      await DoAxiosWithErro('/api/users/register','post',{
+      await DoAxiosWithErro('/users/register','post',{
         email:ruleForm.email,
         password:ruleForm.pass,
         nickname:ruleForm.name,

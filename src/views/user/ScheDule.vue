@@ -46,7 +46,7 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="submitForm">{{ eventForm.id ? '修改' : '添加'}}</el-button>
-          <el-button type="primary" @click="deleteEvent">删除</el-button>
+          <el-button v-show="eventForm.id != null" type="primary" @click="deleteEvent">删除</el-button>
           <el-button @click="resetForm; showEventForm = false">取消</el-button>
         </el-form-item>
       </el-form>
@@ -127,7 +127,7 @@ const calendarOptions = reactive({
   },
   width: '100%',
   height: '80%',
-  editable: true,
+  editable: false,
   selectable: true,
   selectMirror: true,
   dayMaxEvents: true,
@@ -210,7 +210,7 @@ function handleEventClick(info) {
 
   const eventId = info.event.extendedProps.eventId;
 
-  const firstEvent = evetList.class.find(item => item.id === eventId);
+  const firstEvent = evetList.find(item => item.id === eventId);
 
 
   eventForm.title = info.event.title;
