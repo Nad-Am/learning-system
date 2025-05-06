@@ -1,5 +1,25 @@
 <template>
-  <div class="forum">
+  <div class="forum relative">
+
+    <div v-if="!isDetail" class="absolute z-10 top-0 left-0 w-5/6 flex justify-between  bg-cardBg1 ">
+      <el-tabs v-model="activeTab" class="w-full">
+        <el-tab-pane label="全部" name="all" class="w-full">
+        </el-tab-pane>
+        <el-tab-pane label="官方" name="official" class="w-full">
+        </el-tab-pane>
+        <el-tab-pane label="普通" name="normal" class="w-full">
+        </el-tab-pane>
+      </el-tabs>
+      <el-input
+        v-model="inputValue"
+        style="width: 240px; height: 30px;"
+        placeholder="搜索"
+      >
+        <template #append>
+          <el-button @click="searchPost" :icon="Search" />
+        </template>
+      </el-input>
+    </div>
 
     <!-- 贴子列表 -->
     <div @scroll="getMorePostList" ref="postArea" v-if="!isDetail" class="w-full h-full pt-10 p-4 relative flex gap-3 flex-col items-center overflow-y-auto">
@@ -39,6 +59,8 @@
       :isOfficial="post.isOfficial"
       @click="getPostDetail(post.id)"
       />
+
+      <el-empty v-if="postList.length === 0" description="暂无帖子" />
     </div>
 
     <!-- 贴子详情 -->
@@ -103,13 +125,18 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, watch } from 'vue';
 import DissCard from '@/components/discussion/DissCard.vue';
 import CommitCard from '@/components/discussion/CommitCard.vue';
 import { DoAxiosWithErro } from '@/api';
 import { ElMessage } from 'element-plus';
 import { Close } from '@element-plus/icons-vue';
+import { Search } from '@element-plus/icons-vue';
 
+
+const activeTab = ref('')
+const inputValue = ref('')
+const isSearch = ref(false)
 
 const postList = reactive([]); // 贴子列表
 const isDetail = ref(false); // 是否进入贴子详情
@@ -149,6 +176,13 @@ const newPost = reactive({
 
 const commentList = reactive([]);
 
+watch(activeTab,() => {
+  pageNo.value = 1;
+  hasMore.value = true;
+  postList.splice(0,postList.length);
+  getList();
+})
+
 // 获取贴子列表
 const getList = async () => {
   const res = await DoAxiosWithErro('/post/list','post',{
@@ -156,7 +190,8 @@ const getList = async () => {
       pageSize: 10,
       sortBy: 'time',
       isAsc: true,
-      titleKeyword: ''
+      titleKeyword: isSearch.value ? inputValue.value : '',
+      isOfficial: activeTab.value === 'official' ? true : activeTab.value === 'normal' ? false : null,
     },true);
     if(!res.data.length) {
       hasPostMore.value = false;
@@ -171,6 +206,20 @@ const getPostDetail = async (id) => {
   isDetail.value = true;
   commentList.length = 0;
   getCommentList();
+}
+
+const searchPost = async () => {
+  if(!inputValue.value) {
+    ElMessage.warning('请输入搜索内容');
+    return;
+  }
+  activeTab.value = '';
+  pageNo.value = 1;
+  hasMore.value = true;
+  isSearch.value = true;
+  postList.splice(0,postList.length);
+  await getList();
+  isSearch.value = false;
 }
 
 // 发表贴子
