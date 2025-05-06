@@ -60,9 +60,11 @@
   import { ref, computed, onUnmounted, onMounted, reactive } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { DoAxiosWithErro } from '@/api';
+  import { useUserStore } from '@/stores/user';
 
   const route = useRoute();
   const router = useRouter();
+  const userStore = useUserStore();
 
   const sessionId = ref(null);
   const totalTime = ref(25 * 60); // 25分钟
@@ -174,17 +176,28 @@
     })
   }
 
-  const getNowTom = () => {
-    DoAxiosWithErro('/study/sessions/current','get',{},true).then(res => {
-      sessionId.value = res.data.id || null;
-    })
+  const getNowTom = async () => {
+    // DoAxiosWithErro('/study/sessions/current','get',{},true).then(res => {
+    //   sessionId.value = res.data.id || null;
+    // })
+    const res = await fetch('/api/study/sessions/current',{
+      method: 'GET',
+      headers:{
+        'sa-token-authorization': `${userStore.userToken}`
+      }
+    });
+    const data = await res.json();
+    sessionId.value = data.data?.id || null;
   }
+
 
   onMounted(() => {
     console.log(route.params.id);
     getDetaile(route.params.id);
     getTomoList(route.params.id);
     getNowTom();
+
+    console.log(historyList);
   })
 
   // 组件卸载时清除定时器
