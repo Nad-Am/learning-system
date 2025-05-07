@@ -14,7 +14,7 @@
     </div> -->
 
     <!-- 用户可用头像 -->
-    <div class="w-full h-1/2  overflow-y-auto  p-4">
+    <div class="w-full h-1/3  overflow-y-auto  p-4">
       <p class="text-xl font-bold mb-2">全部头像</p>
       <div class="flex flex-wrap  gap-3 items-center"> 
         <div class="flex relative flex-col gap-2 items-center justify-center p-2" v-for="item in userAvaterList" :key="item">
@@ -26,7 +26,7 @@
     </div>
 
     <!-- 上传头像 -->
-    <div class="w-full border-4 border-b-0 border-red-100 rounded-lg bg-cardBg h-1/2 p-4">
+    <div class="w-full border-4 border-b-0 border-red-100 rounded-lg bg-cardBg h-2/3 p-4">
       <p class="text-xl font-bold mb-2">添加新头像</p>
       <el-avatar style="margin: 1rem; margin-left: 5rem;" :src="newAvater.imageUrl"></el-avatar>
       <el-form style="position: relative;" :model="newAvater" label-width="120px">

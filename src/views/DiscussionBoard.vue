@@ -1,13 +1,28 @@
 <template>
   <div class="forum relative">
 
-    <div v-if="!isDetail" class="absolute z-10 top-0 left-0 w-5/6 flex justify-between  bg-cardBg1 ">
-      <el-tabs v-model="activeTab" class="w-full">
-        <el-tab-pane label="全部" name="all" class="w-full">
+    <div v-if="!isDetail" class="absolute z-10 top-0 left-0 w-5/6 flex justify-between">
+      <el-tabs v-model="activeTab"  class="demo-tabs">
+        <el-tab-pane name="all" class="w-full tab-text" >
+          <template #label>
+            <span class="custom-tabs-label">
+              <span class="text-white font-bold">全部</span>
+            </span>
+          </template>
         </el-tab-pane>
-        <el-tab-pane label="官方" name="official" class="w-full">
+        <el-tab-pane name="官方" class="w-full tab-text-official">
+          <template #label>
+            <span class="custom-tabs-label">
+              <span class="text-white font-bold">官方</span>
+            </span>
+          </template>
         </el-tab-pane>
-        <el-tab-pane label="普通" name="normal" class="w-full">
+        <el-tab-pane name="normal" class="w-full tab-text-normal">
+          <template #label>
+            <span class="custom-tabs-label">
+              <span class="text-white font-bold">普通</span>
+            </span>
+          </template>
         </el-tab-pane>
       </el-tabs>
       <el-input
@@ -401,7 +416,7 @@ onMounted(async () => {
 })
 
 </script>
-<style scoped>
+<style >
 .forum{
   width: 100%;
   height: 100%;
@@ -420,4 +435,5 @@ onMounted(async () => {
 .comlist{
   scrollbar-width: none;
 }
+
 </style>

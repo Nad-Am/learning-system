@@ -1,10 +1,16 @@
 <template>
   <div class="w-full h-full">
     <el-row class="h-full text-white flex items-center justify-between">
-        <el-col :span="18" class="h-full">
-            <el-avatar :size="70" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"></el-avatar>
+        <el-col :span="4" class="h-full">
+            <el-avatar :size="70" :src="userStore.userInfo.avatarUrl"></el-avatar>
             <span class="h-5 pb-4">{{ userStore.userInfo.nickname }}</span>
         </el-col>
+
+        <el-col :span="15">
+          <slot></slot>
+        </el-col>
+
+
         <el-col :span="2" class="flex items-center justify-center">
           <div class="flex items-center justify-center text-red-200">
             <el-icon class="my-2" color="red" size="30"><StarFilled /></el-icon>

@@ -2,13 +2,12 @@
   <div class="h-screen w-screen adminmain">
     <el-container class="h-full w-full">
       <el-header style="height: 10%; background: rgba(0,0,0,0);">
-        <NavTop />
+        <NavTop>
+          <MeNu :routers="routers"/>
+        </NavTop>
       </el-header>
       <el-main class="" style="height: 90%;">
         <el-container class="h-full">
-          <el-aside class=" h-full">
-            <MeNu :routers="routers"/>
-          </el-aside>
           <el-main class="h-full main ">
             <router-view></router-view>
           </el-main>
