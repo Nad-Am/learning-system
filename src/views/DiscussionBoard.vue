@@ -10,7 +10,7 @@
             </span>
           </template>
         </el-tab-pane>
-        <el-tab-pane name="官方" class="w-full tab-text-official">
+        <el-tab-pane name="official" class="w-full tab-text-official">
           <template #label>
             <span class="custom-tabs-label">
               <span class="text-white font-bold">官方</span>
@@ -21,6 +21,13 @@
           <template #label>
             <span class="custom-tabs-label">
               <span class="text-white font-bold">普通</span>
+            </span>
+          </template>
+        </el-tab-pane>
+        <el-tab-pane name="my" class="w-full tab-text-normal">
+          <template #label>
+            <span class="custom-tabs-label">
+              <span class="text-white font-bold">我的</span>
             </span>
           </template>
         </el-tab-pane>
@@ -37,7 +44,7 @@
     </div>
 
     <!-- 贴子列表 -->
-    <div @scroll="getMorePostList" ref="postArea" v-if="!isDetail" class="w-full h-full pt-10 p-4 relative flex gap-3 flex-col items-center overflow-y-auto">
+    <div @scroll="getMorePostList" ref="postArea" v-if="!isDetail" class="listArea w-full h-full pt-10 p-4 relative flex gap-3 flex-col items-center overflow-y-auto">
       <!-- 发布帖子按钮 -->
       <div class="addIcon w-8 h-8" @click="isAdd = true"></div>
 
@@ -72,6 +79,7 @@
       :author="post.nickname"
       :isAnonymous="post.isAnonymous"
       :isOfficial="post.isOfficial"
+      :content="post.content"
       @click="getPostDetail(post.id)"
       />
 
@@ -95,7 +103,7 @@
              <div>发布时间：{{ postDetail.createdAt }}</div>
            </div>
          </div>
-         <div class="text-xl mt-4 w-full h-4/6  overflow-y-auto">
+         <div class="content text-xl mt-4 w-full h-4/6  overflow-y-auto">
           <p class="text-xl font-bold mb-2">内容:</p>
           {{ postDetail.content }}
          </div>
@@ -147,7 +155,10 @@ import { DoAxiosWithErro } from '@/api';
 import { ElMessage } from 'element-plus';
 import { Close } from '@element-plus/icons-vue';
 import { Search } from '@element-plus/icons-vue';
+import { useUserStore } from '@/stores/user';
 
+const userStore = useUserStore();
+const userId = userStore.userInfo?.id;
 
 const activeTab = ref('')
 const inputValue = ref('')
@@ -192,8 +203,9 @@ const newPost = reactive({
 const commentList = reactive([]);
 
 watch(activeTab,() => {
-  pageNo.value = 1;
-  hasMore.value = true;
+  postPageNo.value = 1;
+  hasPostMore.value = true;
+  console.log(activeTab.value,'activeTab');
   postList.splice(0,postList.length);
   getList();
 })
@@ -205,6 +217,7 @@ const getList = async () => {
       pageSize: 10,
       sortBy: 'time',
       isAsc: true,
+      userId: activeTab.value === 'my' ? userId : null,
       titleKeyword: isSearch.value ? inputValue.value : '',
       isOfficial: activeTab.value === 'official' ? true : activeTab.value === 'normal' ? false : null,
     },true);
@@ -243,15 +256,15 @@ const addPost = async () => {
     ElMessage.warning('标题或内容不能为空');
     return;
   }
-  console.log(newPost);
   DoAxiosWithErro('/post','post',{
     title: newPost.title,
     content: newPost.content,
     isAnonymous: newPost.isAnonymous
   },true).then(res => {
-    ElMessage.success('发布成功');
+    ElMessage.success('发布成功,等待审核');
     newPost.content = '';
     newPost.title = '';
+    isAdd.value = false;
     getList();
   })
 }
@@ -432,7 +445,14 @@ onMounted(async () => {
   background: url('/src/assets/image/add.png') no-repeat;
   background-size: cover;
 }
+.listArea{
+  scrollbar-width: none;
+}
+
 .comlist{
+  scrollbar-width: none;
+}
+.content{
   scrollbar-width: none;
 }
 

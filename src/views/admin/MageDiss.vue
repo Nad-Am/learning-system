@@ -36,7 +36,9 @@ const getDissList = async () => {
 // 审核帖子
 const checkPost = async (id:number, status:string) => {
   const res = await DoAxiosWithErro(`/post/review/${id}?status=${status}`,'put',{},true)
-  console.log(res)
+  if(res.code === 200){
+    getDissList()
+  }
 }
 
 onMounted(() => {

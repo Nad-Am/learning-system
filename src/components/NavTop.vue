@@ -2,7 +2,7 @@
   <div class="w-full h-full">
     <el-row class="h-full text-white flex items-center justify-between">
         <el-col :span="4" class="h-full">
-            <el-avatar :size="70" :src="userStore.userInfo.avatarUrl"></el-avatar>
+            <el-avatar :size="70" :src="userStore.userInfo?.avatarUrl"></el-avatar>
             <span class="h-5 pb-4">{{ userStore.userInfo.nickname }}</span>
         </el-col>
 

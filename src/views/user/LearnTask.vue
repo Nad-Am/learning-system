@@ -29,7 +29,7 @@
         </el-form-item>
       </el-form>
     </div>
-    <div class="w-full flex-1 flex-wrap flex gap-10">
+    <div v-loading="isLoading" class="w-full flex-1 flex-wrap flex gap-10">
       <TaskCard
        v-for="task in tasks" 
        :key="task.id" :task="task" 
@@ -63,6 +63,7 @@ const newTask = reactive({
   durationMinutes: 0,
 })
 
+const isLoading = ref(false)
 
 const FromShow = ref(false);
 
@@ -84,9 +85,12 @@ function handleClick (task) {
 }
 
 const getTasks = () => {
+  isLoading.value = true
   DoAxiosWithErro(`/study/tasks`, 'get', {},true).then(res => {
     tasks.splice(0, tasks.length)
     tasks.push(...res.data)
+  }).finally(() => {
+    isLoading.value = false
   })
 }
 

@@ -5,7 +5,7 @@
       <span v-if="!isAnonymous" class="m-2">{{ author }}</span>
     </div>
     <div class="card-body flex-1 p-2 ease-linear overflow-hidden text-ellipsis whitespace-nowrap">
-      这里是雷同取悦啦啊看大家可能看见你的看书看到九年零九年nmlamfk1m的市民开放马卡姆科马克多么快乐·卡每卡的模块密码AKMDK澳门考虑去么克莱德曼开幕的
+      {{ content }}
     </div>
     <div class="flex flex-row-reverse text-red-50 p-1">
         {{ createdAt }}
@@ -36,6 +36,10 @@ defineProps({
   isOfficial: {
     type: Boolean,
     defalt: false
+  },
+  content: {
+    type: String,
+    required: true
   }
 })
 
