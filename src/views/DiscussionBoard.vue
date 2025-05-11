@@ -101,7 +101,6 @@
             <el-radio-group v-if="role === 'admin'" v-model="newPostType" class="ml-1">
               <el-radio :label="0">官方通知</el-radio>
               <el-radio :label="1">考研咨询</el-radio>
-              <el-radio :label="2">学习交流</el-radio>
             </el-radio-group>
           </el-form-item>
           <el-form-item>
@@ -350,20 +349,35 @@ const addPost = async () => {
     return;
   }
   isaddPosting.value = true;
-  DoAxiosWithErro('/post','post',{
-    title: newPost.title,
-    content: newPost.content,
-    isAnonymous: newPost.isAnonymous
-  },true).then(res => {
-    ElMessage.success('发布成功,等待审核');
-    console.log(res);
-    newPost.content = '';
-    newPost.title = '';
-    isAdd.value = false;
+  if(role !== 'admin') {
+    DoAxiosWithErro('/post','post',{
+      title: newPost.title,
+      content: newPost.content,
+      isAnonymous: newPost.isAnonymous
+    },true).then(res => {
+      ElMessage.success('发布成功,等待审核');
+      console.log(res);
+      newPost.content = '';
+      newPost.title = '';
+      isAdd.value = false;
 
-  }).finally(() => {
-    isaddPosting.value = false;
-  })
+    }).finally(() => {
+      isaddPosting.value = false;
+      quitAdd();
+    });
+  } else {
+    DoAxiosWithErro('/post/official','post',{
+      title: newPost.title,
+      content: newPost.content,
+      isAnonymous: newPost.isAnonymous,
+      categoryId: newPostType.value
+    },true).then(res => {
+      console.log(res);
+    }).finally(() =>{
+      isaddPosting.value = false;
+      quitAdd();
+    })
+  }
 }
 
 // 退出发布贴子
