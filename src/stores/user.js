@@ -3,6 +3,9 @@ import { DoAxiosWithErro, DoAxios } from "@/api";
 export const useUserStore =  defineStore('user',{
     state:() => ({
         userInfo:JSON.parse(localStorage.getItem('userInfo')) || {},
+        avatorId:localStorage.getItem('avatorId') || '',
+        avatorUrl:localStorage.getItem('avatarUrl') || '',
+        points: localStorage.getItem('points') || '',
         userToken: localStorage.getItem('userToken') || '',
         isLoggedIn:false
     }),
@@ -27,6 +30,12 @@ export const useUserStore =  defineStore('user',{
               this.userToken = data.data.token;
               Info = data.data;
               localStorage.setItem('userToken', this.userToken);
+              this.points = Info.points;
+              this.avatorId = Info.avatarId;
+              this.avatorUrl = Info.avatarUrl;
+              localStorage.setItem('avatorId',Info.avatarId);
+              localStorage.setItem('avatarUrl',Info.avatarUrl);
+              localStorage.setItem('points',Info.points);
               this.userInfo = Info;
               const infoJSON = JSON.stringify(Info);
               localStorage.setItem('userInfo',infoJSON);
@@ -36,6 +45,10 @@ export const useUserStore =  defineStore('user',{
           DoAxios('/users/logout','post',{},true).finally(() =>{
             localStorage.removeItem('userToken');
             localStorage.removeItem('userInfo');
+            localStorage.removeItem('avatorId');
+            localStorage.removeItem('avatarUrl');
+            localStorage.removeItem('points');
+            this.userToken = '';
             this.isLoggedIn = false;
           })
         }

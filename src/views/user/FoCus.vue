@@ -130,8 +130,8 @@
     DoAxiosWithErro('/study/sessions/start','post',{
       id:null,
       taskId: route.params.id,
-      sessionType: 'worke',
-      durationMinutes: 25
+      sessionType: 'work',
+      durationMinutes: tomtoTime.value,
     },true).then(res => {
       sessionId.value = res.data.id;
       resetTimer();

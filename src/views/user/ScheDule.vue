@@ -6,7 +6,7 @@
       class="absolute top-2/3 left-1/2 -translate-x-1/2 -translate-y-2/3 w-2/3 h-5/6 bg-cardBg z-10"
       v-if="showEventForm"
     >
-      <h1 class="text-2xl text-center text-white mb-4">日程课表</h1>
+      <h1 class="text-2xl text-center text-white mb-4">日程/课表</h1>
       <el-form :model="eventForm" :rules="rules" ref="eventFormRef" label-width="120px">
         <el-form-item label="事件标题" prop="title">
           <el-input v-model="eventForm.title" placeholder="请输入事件标题"></el-input>
@@ -42,7 +42,7 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="重复周数" prop="repeatWeeks">
-          <el-input-number v-model="eventForm.repeatWeeks" :min="1" :max="30" placeholder="请输入重复周数"></el-input-number>
+          <el-input-number v-model="eventForm.repeatWeeks" :min="1" :max="eventForm.eventType === 'class' ? 20 : 1" placeholder="请输入重复周数"></el-input-number>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="submitForm">{{ eventForm.id ? '修改' : '添加'}}</el-button>
@@ -212,7 +212,6 @@ function handleEventClick(info) {
 
   const firstEvent = evetList.find(item => item.id === eventId);
 
-
   eventForm.title = info.event.title;
   eventForm.id = info.event.extendedProps.eventId;
   eventForm.description = info.event.extendedProps.description;
@@ -225,6 +224,7 @@ function handleEventClick(info) {
 }
 
 const resetForm = () => {
+  eventForm.id = null;
   eventForm.title = '';
   eventForm.description = '';
   eventForm.location = '';
@@ -251,21 +251,21 @@ const getClassList = () => {
 const submitForm = () => {
 
   if(!eventForm.id){
-    if(eventForm.eventType === 'schedule'){
-      DoAxiosWithErro('/calendar-events', 'post', {
+    if(eventForm.eventType === 'class'){
+      DoAxiosWithErro('/calendar-events/class', 'post', {
         ...eventForm,
         startTime: getTime(eventForm.startTime),
         endTime: getTime(eventForm.endTime)
       }, true).then(res => {
-        evetList.push(...res.data);
+        evetList.push(res.data);
       })
     } else {
-      DoAxiosWithErro('/calendar-events', 'post', {
+      DoAxiosWithErro('/calendar-events/schedule', 'post', {
         ...eventForm,
         startTime: getTime(eventForm.startTime),
         endTime: getTime(eventForm.endTime)
       }, true).then(res => {
-        evetList.push(...res.data);
+        evetList.push(res.data);
       })
     }
   } else {
@@ -277,18 +277,12 @@ const submitForm = () => {
       const index = evetList.findIndex(item => item.id === eventForm.id);
       if (index !== -1){
         evetList.splice(index, 1, res.data);
-        console.log(evetList, sheduleList.value, '更新事件');
       }
     })
   }
   
-  detectConflicts(sheduleList.value); // 提交后检测冲突
   fullCalendar.value.getApi().refetchEvents(); // 初始化时重新获取和渲染事件
-
-  setTimeout(() =>{
-    fullCalendar.value.getApi().refetchEvents(); // 初始化时重新获取和渲染事件
-  },600)
-
+  console.log(evetList, sheduleList.value, '更新事件');
   showEventForm.value = false;
   resetForm();
 };
@@ -303,6 +297,7 @@ const deleteEvent = () => {
     showEventForm.value = false;
   })
 }
+
 
 onMounted(() => {
   getClassList();

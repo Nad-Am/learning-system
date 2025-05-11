@@ -11,7 +11,7 @@
     </div>
 
     <div class="flex mb-1">
-      <span class="font-bold text-gray-600">总学习时间：</span>
+      <span class="font-bold text-gray-600">计划学习时间：</span>
       <span class="text-gray-700">{{ task.durationMinutes ? task.durationMinutes : 0}} 分钟</span>
     </div>
 
@@ -21,8 +21,8 @@
     </div>
 
     <div class="flex">
-      <span class="font-bold text-gray-600">完成的番茄数：</span>
-      <span class="text-gray-700">{{ task.completedPomodoros }}</span>
+      <span class="font-bold text-gray-600">学习总时间：</span>
+      <span class="text-gray-700">{{ task.totalStudyMinutes || 0 }} 分钟</span>
     </div>
 
     <div class="mt-1 rounded-lg">

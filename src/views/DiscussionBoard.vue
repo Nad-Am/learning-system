@@ -1,30 +1,37 @@
 <template>
-  <div class="forum relative">
+  <div class="forum relative pt-10">
 
     <div v-if="!isDetail" class="absolute z-10 top-0 left-0 w-5/6 flex justify-between">
       <el-tabs v-model="activeTab"  class="demo-tabs">
-        <el-tab-pane name="all" class="w-full tab-text" >
+        <el-tab-pane :disabled="isfetching" name="all" class="w-full tab-text" >
           <template #label>
             <span class="custom-tabs-label">
               <span class="text-white font-bold">全部</span>
             </span>
           </template>
         </el-tab-pane>
-        <el-tab-pane name="official" class="w-full tab-text-official">
+        <el-tab-pane :disabled="isfetching" name="official" class="w-full tab-text-official">
           <template #label>
             <span class="custom-tabs-label">
               <span class="text-white font-bold">官方</span>
             </span>
           </template>
         </el-tab-pane>
-        <el-tab-pane name="normal" class="w-full tab-text-normal">
+        <el-tab-pane :disabled="isfetching" name="consultation" class="w-full tab-text-official">
           <template #label>
             <span class="custom-tabs-label">
-              <span class="text-white font-bold">普通</span>
+              <span class="text-white font-bold">考研资讯</span>
             </span>
           </template>
         </el-tab-pane>
-        <el-tab-pane name="my" class="w-full tab-text-normal">
+        <el-tab-pane :disabled="isfetching" name="normal" class="w-full tab-text-normal">
+          <template #label>
+            <span class="custom-tabs-label">
+              <span class="text-white font-bold">学习交流</span>
+            </span>
+          </template>
+        </el-tab-pane>
+        <el-tab-pane :disabled="isfetching" name="my" class="w-full tab-text-normal">
           <template #label>
             <span class="custom-tabs-label">
               <span class="text-white font-bold">我的</span>
@@ -43,8 +50,34 @@
       </el-input>
     </div>
 
+    <div v-if="activeTab === 'my' && role !== 'admin' && !isDetail" class="w-1/6 absolute z-10 top-8 right-1/4 flex flex-col items-center">
+      <el-tabs v-model="myactiveTab"  class="demo-tabs">
+        <el-tab-pane :disabled="isfetching" name="approved" class="w-full tab-text" >
+          <template #label>
+            <span class="custom-tabs-label">
+              <span class="text-white font-bold">已发布</span>
+            </span>
+          </template>
+        </el-tab-pane>
+        <el-tab-pane :disabled="isfetching" name="pending" class="w-full tab-text-official">
+          <template #label>
+            <span class="custom-tabs-label">
+              <span class="text-white font-bold">待审核</span>
+            </span>
+          </template>
+        </el-tab-pane>
+        <el-tab-pane :disabled="isfetching" name="rejected" class="w-full tab-text-official">
+          <template #label>
+            <span class="custom-tabs-label">
+              <span class="text-white font-bold">已拒绝</span>
+            </span>
+          </template>
+        </el-tab-pane>
+      </el-tabs>
+    </div>
+
     <!-- 贴子列表 -->
-    <div @scroll="getMorePostList" ref="postArea" v-if="!isDetail" class="listArea w-full h-full pt-10 p-4 relative flex gap-3 flex-col items-center overflow-y-auto">
+    <div v-loading="isfetching" @scroll="getMorePostList" ref="postArea" v-if="!isDetail" class="listArea w-full h-full pt-10 p-4 relative flex gap-3 flex-col items-center overflow-y-auto">
       <!-- 发布帖子按钮 -->
       <div class="addIcon w-8 h-8" @click="isAdd = true"></div>
 
@@ -65,23 +98,32 @@
             <el-switch v-model="newPost.isAnonymous" active-text="是" inactive-text="否"></el-switch>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="addPost">发布</el-button>
+            <el-radio-group v-if="role === 'admin'" v-model="newPostType" class="ml-1">
+              <el-radio :label="0">官方通知</el-radio>
+              <el-radio :label="1">考研咨询</el-radio>
+              <el-radio :label="2">学习交流</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item>
+            <el-button :disabled="isaddPosting" type="primary" @click="addPost">发布</el-button>
           </el-form-item>
         </el-form>
       </div>
 
-      <DissCard 
-      style="width: 70%; height: 120px;"
-      v-for="post in postList" 
-      :key="post.id" 
-      :title="post.title"
-      :createdAt="post.createdAt"
-      :author="post.nickname"
-      :isAnonymous="post.isAnonymous"
-      :isOfficial="post.isOfficial"
-      :content="post.content"
-      @click="getPostDetail(post.id)"
-      />
+      <div v-for="post in postList" :key="post.id"  class="postItem relative flex flex-col gap-3 items-center" style="width: 70%;">
+        <DissCard 
+          style="width: 100%; height: 120px;"
+          :title="post.title"
+          :createdAt="post.createdAt"
+          :author="post.nickname"
+          :isAnonymous="post.isAnonymous"
+          :isOfficial="post.isOfficial"
+          :content="post.content"
+          :status="post.status"
+          @click="getPostDetail(post)"
+          />
+          <el-button v-if="role === 'admin' || activeTab === 'my'" @click="deletePost(post.id)" class="delet p-1 absolute bottom-0 right-0" type="danger">删除</el-button>
+      </div>
 
       <el-empty v-if="postList.length === 0" description="暂无帖子" />
     </div>
@@ -99,7 +141,7 @@
          <div class="flex justify-between w-full">
            <div class="text-4xl font-bold">{{ postDetail.title }}</div>
            <div>
-             <div>作者：{{ postDetail.nickname }}</div>
+             <div>作者：{{ postDetail.nickname }} <el-button type="danger" @click="banUser(postDetail?.id)" v-if="role === 'admin'">封禁</el-button></div>
              <div>发布时间：{{ postDetail.createdAt }}</div>
            </div>
          </div>
@@ -159,10 +201,16 @@ import { useUserStore } from '@/stores/user';
 
 const userStore = useUserStore();
 const userId = userStore.userInfo?.id;
+const role = userStore.userInfo?.role;
 
-const activeTab = ref('')
+const newPostType = ref(0); // 0: 官方 1: 考研咨询 2: 交流讨论
+
+const myactiveTab = ref('approved');
+const activeTab = ref('all')
 const inputValue = ref('')
 const isSearch = ref(false)
+const isaddPosting = ref(false)
+const isfetching = ref(false) // 是否正在获取
 
 const postList = reactive([]); // 贴子列表
 const isDetail = ref(false); // 是否进入贴子详情
@@ -202,7 +250,7 @@ const newPost = reactive({
 
 const commentList = reactive([]);
 
-watch(activeTab,() => {
+watch([myactiveTab,activeTab],() => {
   postPageNo.value = 1;
   hasPostMore.value = true;
   console.log(activeTab.value,'activeTab');
@@ -210,26 +258,71 @@ watch(activeTab,() => {
   getList();
 })
 
+
+const banUser = async (postId) => {
+
+  DoAxiosWithErro(`/post/ban-user/post/${postId}`,'post',{},true).then(() => {
+      ElMessage.success("已经成功封禁")
+  });
+}
+
+const deletePost = async (id) => {
+    DoAxiosWithErro(`/post/${id}`,'delete',{},true).then(() => {
+      ElMessage.success("已经成功删除")
+      const index = postList.findIndex((item) => item.id === id);
+      postList.splice(index,1);
+    });
+}
+
 // 获取贴子列表
 const getList = async () => {
-  const res = await DoAxiosWithErro('/post/list','post',{
+  console.log('getList',activeTab.value);
+  let res;
+  isfetching.value = true;
+  if(activeTab.value === 'my') {
+    res = await DoAxiosWithErro('/post/my','post',{
+      pageNo: postPageNo.value,
+      pageSize: 10,
+      status: myactiveTab.value,
+    },true).finally(() => {
+      isfetching.value = false;
+    })
+  } else {
+    res = await DoAxiosWithErro('/post/list','post',{
       pageNo: postPageNo.value,
       pageSize: 10,
       sortBy: 'time',
       isAsc: true,
       userId: activeTab.value === 'my' ? userId : null,
       titleKeyword: isSearch.value ? inputValue.value : '',
-      isOfficial: activeTab.value === 'official' ? true : activeTab.value === 'normal' ? false : null,
-    },true);
-    if(!res.data.length) {
-      hasPostMore.value = false;
-    }
-    postList.push(...res.data);
+      status: role === 'admin' ? 'approved' : null,
+      isOfficial: (activeTab.value === 'official' || activeTab.value === 'consultation') ? true : activeTab.value === 'normal' ?false : null,
+      category: activeTab.value === 'official' ? 0 : activeTab.value === 'consultation' ? 1 : activeTab.value === 'normal' ? 2 : null
+    },true).finally(() => {
+      isfetching.value = false;
+    })
+    ;  
+  }
+
+  if(!res.data.length) {
+    hasPostMore.value = false;
+  }
+  postList.push(...res.data);
 }
 // 获取贴子详情
-const getPostDetail = async (id) => {
-  postId.value = id;
-  const res = await DoAxiosWithErro(`/post/${id}`,'get',{},true);
+const getPostDetail = async (post) => {
+  if(post.status === 'pending') {
+    ElMessage.warning('该贴子正在审核中');
+    return;
+  }
+
+  if(post.status === 'rejected') {
+    ElMessage.warning('该贴子已被拒绝');
+    return;
+  }
+
+  postId.value = post.id;
+  const res = await DoAxiosWithErro(`/post/${post.id}`,'get',{},true);
   Object.assign(postDetail,res.data);
   isDetail.value = true;
   commentList.length = 0;
@@ -256,16 +349,20 @@ const addPost = async () => {
     ElMessage.warning('标题或内容不能为空');
     return;
   }
+  isaddPosting.value = true;
   DoAxiosWithErro('/post','post',{
     title: newPost.title,
     content: newPost.content,
     isAnonymous: newPost.isAnonymous
   },true).then(res => {
     ElMessage.success('发布成功,等待审核');
+    console.log(res);
     newPost.content = '';
     newPost.title = '';
     isAdd.value = false;
-    getList();
+
+  }).finally(() => {
+    isaddPosting.value = false;
   })
 }
 
@@ -454,6 +551,14 @@ onMounted(async () => {
 }
 .content{
   scrollbar-width: none;
+}
+
+.delet{
+  display: none;
+}
+
+.postItem:hover .delet {
+  display: block;
 }
 
 </style>

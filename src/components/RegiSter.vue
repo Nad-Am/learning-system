@@ -114,12 +114,12 @@ const checkCode = (rule,value,callback) => {
 }
 
 const validatePass = (rule, value, callback) => {
-  const reg = /^(?=.*[a-zA-Z])(?=.*[\d])[a-zA-Z\d]{6,10}$/;
+  const reg = /^(?=.*[a-zA-Z])(?=.*[\d])[a-zA-Z\d]{6,}$/;
   if (value === '') {
-    return callback(new Error('Please input the password'));
+    return callback(new Error('请输入密码'));
   }
   if (!reg.test(value)) {
-    return callback(new Error("密码是至少各包含一个数字和英文的8位字符串"));
+    return callback(new Error("密码是包含数字和英文的不低于8位的字符串"));
   }
   if (ruleForm.checkPass !== '') {
     ruleFormRef.value?.validateField("checkPass");
@@ -130,9 +130,9 @@ const validatePass = (rule, value, callback) => {
 
 const validatePass2 = (rule, value, callback) => {
   if (value === '') {
-    callback(new Error('Please input the password again'))
+    callback(new Error('请再次输入密码'))
   } else if (value !== ruleForm.pass) {
-    callback(new Error("Two inputs don't match!"))
+    callback(new Error("两次输入密码不一致"))
   } else {
     callback()
   }

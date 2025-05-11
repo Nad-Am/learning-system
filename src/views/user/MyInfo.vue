@@ -48,6 +48,7 @@ import { useUserStore } from '@/stores/user';
                     message:'修改成功',
                     typ:'success'
                 })
+
             } catch (error) {
                 console.error("请求失败：", error);
             } finally {
@@ -70,10 +71,13 @@ const handleChangeAvatar = (item) => {
                 ElMessage({
                     message:'兑换成功',
                     type:'success'
-                }) 
+                })
+                item.isUnlocked = true;
                 DoAxiosWithErro(`/users/change-avatar/${item.id}`, 'post',{}, true).then(()=>{
-                    userStore.userInfo.points = userStore.userInfo.points  - item.pointsRequired;
-                    userStore.userInfo.avatarUrl = item.imageUrl;
+                    userStore.points = userStore.userInfo.points  - item.pointsRequired;
+                    userStore.avatorUrl = item.imageUrl;
+                    localStorage.setItem('points',userStore.userInfo.points);
+                    localStorage.setItem('avatarUrl',item.imageUrl);
                 })
             } else {
                 ElMessage({
@@ -85,7 +89,8 @@ const handleChangeAvatar = (item) => {
         return;
     }
     const res = DoAxiosWithErro(`/users/change-avatar/${item.id}`, 'post',{}, true);
-    userStore.userInfo.avatarUrl = item.imageUrl;
+    userStore.avatorUrl = item.imageUrl;
+    localStorage.setItem('avatarUrl',item.imageUrl);
     console.log(res);
 };
 
@@ -104,12 +109,12 @@ onMounted(() => {
 </script>
 <template>
     <div class="p-4">
-        <div style="height: 100px; width: 100px;">
+        <div style="">
             <el-avatar
                 :size="80"
-                :src="userStore.userInfo.avatarUrl"
+                :src="userStore.avatorUrl"
             />
-            <el-dropdown class="custom-dropdown">
+            <!-- <el-dropdown class="custom-dropdown">
                 <span>修改头像</span>
                 <template #dropdown>
                     <el-dropdown-menu>
@@ -125,7 +130,22 @@ onMounted(() => {
                         </el-dropdown-item>
                     </el-dropdown-menu>
                 </template>
-            </el-dropdown>
+            </el-dropdown> -->
+            <div class="w-full flex p-4 flex-wrap">
+                <div class="relative" v-for="item in avatarList" :key="item.id">
+                    <el-avatar
+                        :size="50"
+                        :src="item.imageUrl"
+                        class="m-1"
+                        :key="item.id"
+                        @click="handleChangeAvatar(item)"
+                    />
+                    <div class="absolute text-sm p-1 left-2 -bottom-4  rounded-full">
+                        {{ item.pointsRequired }}
+                    </div>
+                    <div v-if="!item.isUnlocked" class="lock rounded-full w-8 h-8"></div>
+                </div>
+            </div>
         </div>
 
         <div>
@@ -161,8 +181,8 @@ onMounted(() => {
 }
 .lock {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+  right: -0.5rem;
+  bottom: -0.5rem;
   background: url("/src/assets/image/lock.png");
   background-size: cover;
   background-repeat: no-repeat;

@@ -17,7 +17,11 @@
     <div class="w-full h-1/3  overflow-y-auto  p-4">
       <p class="text-xl font-bold mb-2">全部头像</p>
       <div class="flex flex-wrap  gap-3 items-center"> 
-        <div class="flex relative flex-col gap-2 items-center justify-center p-2" v-for="item in userAvaterList" :key="item">
+        <div
+         class="flex relative flex-col gap-2 items-center justify-center p-2"
+         v-for="item in userAvaterList" :key="item"
+         @click="deleteAvater(item)"
+         >
           <el-avatar size="large" :src="item.imageUrl"></el-avatar>
           <div v-if="!item.isUnlocked" class="lock rounded-full w-8 h-8"></div>
           <p>{{ item.name }}</p>
@@ -54,7 +58,7 @@
             </label>
           </div>
         </el-form-item>
-        <el-button class="m-2 ml-4 absolute bottom-0 left-1/4" @click="uploadAvatar">上传头像</el-button>
+        <el-button :disabled="isfetching" class="m-2 ml-4 absolute bottom-0 left-1/4" @click="uploadAvatar">上传头像</el-button>
       </el-form>
     </div>
   </div>
@@ -62,9 +66,10 @@
 
 <script lang="ts" setup>
 import { DoAxiosWithErro } from '@/api';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { onMounted, reactive, ref } from 'vue';
 
+const isfetching = ref(false);
 const avaterList = reactive([])
 const userAvaterList = reactive([])
 const file = ref(null);
@@ -84,7 +89,6 @@ const handleFileUpload = (event) => {
   newAvater.imageUrl = URL.createObjectURL(event.target.files[0]);
   file.value = event.target.files[0];
   console.log(newAvater.imageUrl);
-  
 };
 
 // 上传头像
@@ -93,12 +97,41 @@ const uploadAvatar = async () => {
     ElMessage.warning('请填写完整信息');
     return;
   }
+  isfetching.value = true;
   const formData = new FormData();
   formData.append('file', file.value);
-  await DoAxiosWithErro(`/api/avatars/upload?name=${newAvater.name}&pointsRequired=${newAvater.pointsRequired}&isDefault=${newAvater.isDefault}`, 
+  await DoAxiosWithErro(`/avatars/upload?name=${newAvater.name}&pointsRequired=${newAvater.pointsRequired}&isDefault=${newAvater.isDefault}`, 
     'post', formData, true).then(res => {
-    console.log(res);
+    reset()
+    ElMessage.success('上传成功');
+    userAvaterList.push(res.data)
+  }).finally(() => {
+    isfetching.value = false;
   })
+}
+
+const deleteAvater = (item) => {
+  ElMessageBox.confirm('确定要删除该头像吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  }).then(() => {
+    const id = item.id;
+    console.log(id);
+    DoAxiosWithErro(`/avatars/${id}`, 'delete', {}, true).then(res => {
+      ElMessage.success('删除成功');
+      const index = userAvaterList.indexOf(item);
+      console.log(index,id);
+      userAvaterList.splice(index, 1);
+    })
+  })
+}
+
+const reset = () => {
+  newAvater.name = '';
+  newAvater.imageUrl = '';
+  newAvater.pointsRequired = 0;
+  newAvater.isDefault = false;
 }
 
 

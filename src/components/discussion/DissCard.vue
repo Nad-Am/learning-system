@@ -7,8 +7,17 @@
     <div class="card-body flex-1 p-2 ease-linear overflow-hidden text-ellipsis whitespace-nowrap">
       {{ content }}
     </div>
-    <div class="flex flex-row-reverse text-red-50 p-1">
+    <div class="w-full  flex justify-between text-red-50 p-1">
+
         {{ createdAt }}
+        <div v-if="status === 'pending' " class=" p-1 text-red-400">
+          审核中
+          <el-icon><RemoveFilled /></el-icon>
+        </div>
+        <div v-if="status === 'rejected' " class=" p-1 text-red-400">
+          已拒绝
+          <el-icon><WarningFilled /></el-icon>
+        </div>
     </div>
     <div v-if="isOfficial" class="offical w-10 h-10"></div>
   </div>
@@ -38,6 +47,10 @@ defineProps({
     defalt: false
   },
   content: {
+    type: String,
+    required: true
+  },
+  status: {
     type: String,
     required: true
   }

@@ -4,7 +4,7 @@ import { useUserStore } from "@/stores/user";
 
 const myApi = axios.create({
     baseURL: '/api',
-    timeout: 5000,
+    timeout: 10000,
 });
 
 myApi.interceptors.response.use(
