@@ -85,7 +85,7 @@ const conflictingEvents = reactive(new Set()); // 存储冲突事件的 ID
 const sheduleList = computed(() => {
   const list = [];
   evetList.forEach(item => {
-    for (let i = 0; i <= item.repeatWeeks; i++) { // 修复循环条件
+    for (let i = 0; i <= item.repeatWeeks - 1; i++) { // 修复循环条件
       const originalStart = new Date(item.startTime);
       const originalEnd = new Date(item.endTime);
 
